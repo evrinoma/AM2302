@@ -1,0 +1,6 @@
+#!/bin/bash
+FILE="/mnt/disk/LOG/temper.log"
+/root/AM2302/AM2302 > /dev/null
+DATE=`date +"%Y-%m-%d-%H:%M:%S"`
+echo -n "$DATE - "	>>$FILE
+/root/AM2302/AM2302	>>$FILE
