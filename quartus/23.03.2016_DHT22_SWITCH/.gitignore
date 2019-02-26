@@ -1,0 +1,10 @@
+*
+!.gitignore
+!*.v
+!*.vt
+!*.bdf
+!*.bsf
+!*.csv
+!*.qsf
+!*.qpf
+!*.logicdata
