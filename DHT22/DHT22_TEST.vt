@@ -1,0 +1,148 @@
+// Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
+// Your use of Altera Corporation's design tools, logic functions 
+// and other software and tools, and its AMPP partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Altera Program License 
+// Subscription Agreement, the Altera Quartus Prime License Agreement,
+// the Altera MegaCore Function License Agreement, or other 
+// applicable license agreement, including, without limitation, 
+// that your use is for the sole purpose of programming logic 
+// devices manufactured by Altera and sold by Altera or its 
+// authorized distributors.  Please refer to the applicable 
+// agreement for further details.
+
+// *****************************************************************************
+// This file contains a Verilog test bench template that is freely editable to  
+// suit user's needs .Comments are provided in each section to help the user    
+// fill out necessary details.                                                  
+// *****************************************************************************
+// Generated on "03/11/2016 15:18:46"
+                                                                                
+// Verilog Test Bench template for design : DHT22
+// 
+// Simulation tool : ModelSim-Altera (Verilog)
+// 
+
+`timescale 10 ns/ 10 ps
+module DHT22_vlg_tst();
+// constants                                           
+// test vector input registers
+reg clk;
+reg get;
+reg reset;
+reg treg_sda;
+// wires                                               
+reg [39:0]  treg_data = 40'h0292010DA2;
+reg [9:0] counter = 10'd39;
+wire[39:0]  data;
+wire sda;
+reg en;
+
+wire treg_data_bit;
+
+// assign statements (if any)                          
+assign sda = (en)?treg_sda:1'bZ;
+
+assign treg_data_bit = treg_data[counter];
+
+DHT22_TEST WIRE_1 (
+// port map - connection between master ports and signals/registers   
+	.clk(clk),
+	.data(data),
+	.get(get),
+	.reset(reset),
+	.sda(sda)
+);
+
+initial begin          
+en =  1'b0;
+clk = 1'b0;
+get = 1'b0;
+reset = 1'b1;
+#50
+reset = 1'b0;
+#100
+reset = 1'b1;
+#150
+get = 1'b1;
+#150
+get = 1'b0;
+
+$display("Running testbench");                       
+end   
+                                                 
+always begin                                                  
+#25 clk = ~clk;
+end     
+
+event STATE_RESPONSE;
+event STATE_DATA_LOW;
+event STATE_DATA_HIGH;
+event STATE_STOP;
+
+initial begin
+	forever begin
+		@(STATE_RESPONSE)
+			en =  1'b1;
+			treg_sda = 1'b0;
+		#8000
+			treg_sda = 1'b1;
+		#8000 ->STATE_DATA_LOW;
+	end
+end
+
+initial begin
+	forever begin
+		@(STATE_DATA_LOW)
+			treg_sda = 1'b0;
+			#5000	->STATE_DATA_HIGH;
+	end
+end
+
+initial begin
+	forever begin
+		@(STATE_DATA_HIGH)
+			treg_sda = 1'b1;
+			if (counter==0) 
+			begin
+				if (treg_data[counter])
+				#7000 ->STATE_STOP;
+				else
+				#2600 ->STATE_STOP;
+			end
+			else
+			begin
+				if (treg_data[counter]) 
+					begin
+					counter <= counter - 10'd1;
+					#7000 ->STATE_DATA_LOW;
+					end
+				else
+					begin
+					counter <= counter - 10'd1;
+					#2600 ->STATE_DATA_LOW;
+					end
+			end
+	end
+end
+
+initial begin
+	forever begin
+		@(STATE_STOP)
+			treg_sda = 1'b0;
+			#5000	treg_sda = 1'b1;
+			en =  1'b0;
+	end
+end    
+	
+
+initial begin
+#104000 ->STATE_RESPONSE;
+#480000 $stop;
+end 
+	
+endmodule
+
+
